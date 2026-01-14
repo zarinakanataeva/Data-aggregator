@@ -1,7 +1,10 @@
 package com.skillbox.controller.dto;
 
+import com.skillbox.data.model.Commentable;
 import com.skillbox.data.model.Recurring;
 import com.skillbox.data.model.Transaction;
+import jdk.jfr.Category;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.function.Predicate;
@@ -13,6 +16,10 @@ public class TransactionFilterDto {
 
     LocalDate startDate;
     LocalDate endDate;
+    String commentToken;
+    Double minAmount;
+    Double maxAmount;
+    String category;
 
     /**
      * Создает предикат для фильтрации транзакций по диапазону дат. Также вернет те Recurring транзакции, которые будут
@@ -22,7 +29,7 @@ public class TransactionFilterDto {
      */
     private Predicate<Transaction> datePredicate() {
         return transaction -> {
-            LocalDateTime date = null; // TODO: здесь необходимо получить дату транзакции
+            LocalDateTime date = transaction.getDate();
             LocalDateTime start = startDate == null ? null : startDate.atStartOfDay();
             LocalDateTime end = endDate == null ? null : endDate.atStartOfDay();
             return (start == null || !date.isBefore(start)) &&
@@ -39,8 +46,11 @@ public class TransactionFilterDto {
      * @return Предикат для фильтрации транзакций по комментарию.
      */
     private Predicate<Transaction> commentPredicate() {
-        // TODO: реализуйте метод, возвращающий предикат для фильтрации транзакций по комментарию
-        return null;
+        if (commentToken == null || commentToken.isEmpty()){
+           return transaction -> true;
+       }
+        return transaction -> transaction instanceof Commentable &&
+                ((Commentable) transaction).getComments().contains(commentToken);
     }
 
     /**
@@ -50,7 +60,12 @@ public class TransactionFilterDto {
      */
     private Predicate<Transaction> amountPredicate() {
         // TODO: реализуйте метод, возвращающий предикат для фильтрации транзакций по диапазону суммы
-        return null;
+        return transaction -> {
+            double amount = transaction.getAmount();
+            boolean isMinValid = minAmount == null || amount >= minAmount;
+            boolean isMaxValid = maxAmount == null || amount <= maxAmount;
+            return isMaxValid && isMinValid;
+        };
     }
 
     /**
@@ -59,8 +74,10 @@ public class TransactionFilterDto {
      * @return Предикат для фильтрации транзакций по категории.
      */
     private Predicate<Transaction> categoryPredicate() {
-        // TODO: реализуйте метод, возвращающий предикат для фильтрации транзакций по категории
-        return null;
+      if(category == null){
+          return transaction -> true;
+      }
+        return transaction -> transaction.getCategory().equals(category);
     }
 
     /**
@@ -75,4 +92,29 @@ public class TransactionFilterDto {
                 .and(datePredicate())
                 .and(amountPredicate());
     }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public void setComment(String commentToken) {
+        this.commentToken = commentToken;
+    }
+
+    public void setMinAmount(Double minAmount) {
+        this.minAmount = minAmount;
+    }
+
+    public void setMaxAmount(Double maxAmount) {
+        this.maxAmount = maxAmount;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
 }
