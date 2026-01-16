@@ -10,12 +10,12 @@ import java.time.LocalDateTime;
 // TODO: Реализуйте абстрактный класс
 public abstract class Transaction  {
 
-    protected Transaction(LocalDateTime date, double amount, String category, String accountType, int userId){
+    protected Transaction(int userId, int transactionId, LocalDateTime date, String category,double amount, String transactionType ){
         this.amount = amount;
         this.date = date;
         this.category = category;
         this.userId = userId;
-        this. accountType = accountType;
+        this. transactionType = transactionType;
     }
 
     public LocalDateTime getDate() {
@@ -54,16 +54,26 @@ public abstract class Transaction  {
         this.userId = userId;
     }
 
-    public String getAccountType() {
-        return accountType;
+    public String getTransactionType() {
+        return transactionType;
     }
 
-    public void setAccountType(String accountType) {
-        this.accountType = accountType;
+    public void setTransactionType(String accountType) {
+        this.transactionType = accountType;
     }
 
     private int userId;
-    private String accountType;
+    private String transactionType;
+
+    public int getTransactionId() {
+        return transactionId;
+    }
+
+    public void setTransactionId(int transactionId) {
+        this.transactionId = transactionId;
+    }
+
+    private int transactionId;
 
     public abstract String getTransactionInfo();
 

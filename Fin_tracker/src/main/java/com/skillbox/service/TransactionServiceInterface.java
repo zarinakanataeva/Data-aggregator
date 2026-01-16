@@ -8,7 +8,7 @@ import com.skillbox.data.model.Analytic;
 /**
  * Интерфейс для обработки транзакций и расчета аналитических данных.
  */
-public interface TransactionService {
+public interface TransactionServiceInterface {
 
     /**
      * Вычисляет аналитические данные для заданных транзакций.
