@@ -1,5 +1,7 @@
 package com.skillbox.data.model;
 
+import lombok.Data;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +9,7 @@ import java.util.List;
 /**
  * Класс представляющий собой счет в банке
  */
-// TODO: Исправьте этот класс, он не должен быть абстрактным
+@Data
 public class Account implements AccountInfo, BalanceOperations, AccountStatement {
 
     int accountId;
@@ -26,28 +28,8 @@ public class Account implements AccountInfo, BalanceOperations, AccountStatement
 
 
     @Override
-    public int getAccountId() {
-        return accountId;
-    }
-
-    @Override
-    public int getUserId() {
-        return userId;
-    }
-
-    @Override
     public AccountType getAccountType() {
         return AccountType.of(accountType);
-    }
-
-    @Override
-    public List<Transaction> getTransactions() {
-        return transactions;
-    }
-
-    @Override
-    public BigDecimal getBalance() {
-        return balance;
     }
 
     @Override

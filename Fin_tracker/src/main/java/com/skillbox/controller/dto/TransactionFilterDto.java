@@ -4,6 +4,7 @@ import com.skillbox.data.model.Commentable;
 import com.skillbox.data.model.Recurring;
 import com.skillbox.data.model.Transaction;
 import jdk.jfr.Category;
+import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,6 +13,8 @@ import java.util.function.Predicate;
 /**
  * Класс для хранения фильтра по транзакциям.
  */
+
+@Data
 public class TransactionFilterDto {
 
     LocalDate startDate;
@@ -21,12 +24,6 @@ public class TransactionFilterDto {
     Double maxAmount;
     String category;
 
-    /**
-     * Создает предикат для фильтрации транзакций по диапазону дат. Также вернет те Recurring транзакции, которые будут
-     * или были выполнены в указанный диапазон дат
-     *
-     * @return Предикат для фильтрации транзакций по диапазону дат.
-     */
     private Predicate<Transaction> datePredicate() {
         return transaction -> {
             LocalDateTime date = transaction.getDate();
@@ -42,25 +39,11 @@ public class TransactionFilterDto {
         if (commentToken == null || commentToken.isBlank()) {
             return transaction -> true;
         }
-        // Поиск подстроки без учета регистра
         return transaction -> transaction instanceof Commentable &&
                 ((Commentable) transaction).getComments().stream()
                         .anyMatch(c -> c.toLowerCase().contains(commentToken.toLowerCase()));
     }
-    /**
-     * Создает предикат для фильтрации транзакций по комментарию или его части. Фильтруются только транзакции,
-     * имплементирующие интерфейс Commentable. Если токен пустой или null, то возвращается предикат, который всегда
-     * вернет true
-     *
-     * @return Предикат для фильтрации транзакций по комментарию.
-     */
 
-
-    /**
-     * Создает предикат для фильтрации транзакций по диапазону суммы.
-     *
-     * @return Предикат для фильтрации транзакций по диапазону суммы.
-     */
     private Predicate<Transaction> amountPredicate() {
         // TODO: реализуйте метод, возвращающий предикат для фильтрации транзакций по диапазону суммы
         return transaction -> {
@@ -71,11 +54,7 @@ public class TransactionFilterDto {
         };
     }
 
-    /**
-     * Создает предикат для фильтрации транзакций по категории.
-     *
-     * @return Предикат для фильтрации транзакций по категории.
-     */
+
     private Predicate<Transaction> categoryPredicate() {
       if(category == null){
           return transaction -> true;
@@ -83,41 +62,13 @@ public class TransactionFilterDto {
         return transaction -> transaction.getCategory().equals(category);
     }
 
-    /**
-     * Собирает предикат для фильтрации транзакции.
-     *
-     * @return Предикат для фильтрации транзакции.
-     */
+
     public Predicate<Transaction> buildPredicate() {
         return categoryPredicate()
                 .and(amountPredicate())
                 .and(commentPredicate())
                 .and(datePredicate())
                 .and(amountPredicate());
-    }
-
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
-
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
-    }
-
-    public void setComment(String commentToken) {
-        this.commentToken = commentToken;
-    }
-
-    public void setMinAmount(Double minAmount) {
-        this.minAmount = minAmount;
-    }
-
-    public void setMaxAmount(Double maxAmount) {
-        this.maxAmount = maxAmount;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
     }
 
 

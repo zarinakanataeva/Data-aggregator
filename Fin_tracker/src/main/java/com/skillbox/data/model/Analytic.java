@@ -4,6 +4,7 @@ import com.skillbox.controller.dto.AggregateResultDto;
 import com.skillbox.controller.dto.TransactionFilterDto;
 import com.skillbox.controller.option.AggregateOption;
 import com.skillbox.controller.option.GroupOption;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -11,6 +12,8 @@ import java.util.Map;
 /**
  * Класс, хранящий результаты расчета аналитики транзакций
  */
+
+@Data
 public class Analytic {
     private LocalDateTime calculationDate;
     private String groupOption;
@@ -32,13 +35,6 @@ public class Analytic {
             else data.put(key, value.getAverage());
         });
     }
-
-    // Геттеры нужны для Jackson (записи в JSON)
-    public LocalDateTime getCalculationDate() { return calculationDate; }
-    public String getGroupOption() { return groupOption; }
-    public String getAggregateOption() { return aggregateOption; }
-    public String getFilterDescription() { return filterDescription; }
-    public Map<String, Double> getData() { return data; }
 
     @Override
     public String toString() {

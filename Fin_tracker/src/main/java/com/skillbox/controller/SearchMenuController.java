@@ -46,7 +46,7 @@ public class SearchMenuController extends AbstractMenuController<SearchOption> {
         System.out.println("Введите комментарий для поиска (или оставьте поле пустым): ");
         String comment = scanner.nextLine().trim();
         if (!comment.isEmpty()) {
-            filter.setComment(comment);
+            filter.setCommentToken(comment);
         }
         return filter;
     }
