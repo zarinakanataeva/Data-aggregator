@@ -41,16 +41,22 @@ public abstract class AbstractMenuController<E extends Enum<E> & MenuOption> {
             System.out.println(description);
             System.out.println(menu);
             System.out.print("Введите нужную опцию и нажмите Enter: ");
+String input = scanner.nextLine().trim();
 
-            option = scanner.nextInt();
-            if (numOptions.contains(option)) {
-                break;
+            try {
+                option = Integer.parseInt(input); // Превращаем в число
+                if (numOptions.contains(option)) {
+                    break;
+                }
+            } catch (NumberFormatException e) {
+                // Если ввели не число, цикл просто пойдет дальше
             }
-            System.err.println("Выбрана неверная опция!\n"
-                    + "Попробуйте заново.\n");
+
+            System.err.println("Выбрана неверная опция!\n" + "Попробуйте заново.\n");
         }
         return OptionUtils.of(options, option);
     }
+
 
     /**
      * Возвращает строковое представление меню.

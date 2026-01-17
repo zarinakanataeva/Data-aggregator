@@ -52,8 +52,9 @@ public class SearchMenuController extends AbstractMenuController<SearchOption> {
     }
 
     private TransactionFilterDto inputAmount(TransactionFilterDto filter) {
+
         System.out.println("Введите минимальную сумму транзакции (Enter - не ограничивать сумму): ");
-        String minAmountInput = scanner.nextLine();
+        String minAmountInput = scanner.nextLine().trim();
         if (!minAmountInput.isEmpty()) {
             try {
                 double minAmount = Double.parseDouble(minAmountInput);

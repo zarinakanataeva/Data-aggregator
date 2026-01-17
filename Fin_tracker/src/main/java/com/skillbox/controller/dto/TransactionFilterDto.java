@@ -38,6 +38,15 @@ public class TransactionFilterDto {
         };
     }
 
+    private Predicate<Transaction> commentPredicate() {
+        if (commentToken == null || commentToken.isBlank()) {
+            return transaction -> true;
+        }
+        // Поиск подстроки без учета регистра
+        return transaction -> transaction instanceof Commentable &&
+                ((Commentable) transaction).getComments().stream()
+                        .anyMatch(c -> c.toLowerCase().contains(commentToken.toLowerCase()));
+    }
     /**
      * Создает предикат для фильтрации транзакций по комментарию или его части. Фильтруются только транзакции,
      * имплементирующие интерфейс Commentable. Если токен пустой или null, то возвращается предикат, который всегда
@@ -45,13 +54,7 @@ public class TransactionFilterDto {
      *
      * @return Предикат для фильтрации транзакций по комментарию.
      */
-    private Predicate<Transaction> commentPredicate() {
-        if (commentToken == null || commentToken.isEmpty()){
-           return transaction -> true;
-       }
-        return transaction -> transaction instanceof Commentable &&
-                ((Commentable) transaction).getComments().contains(commentToken);
-    }
+
 
     /**
      * Создает предикат для фильтрации транзакций по диапазону суммы.
@@ -116,5 +119,19 @@ public class TransactionFilterDto {
     public void setCategory(String category) {
         this.category = category;
     }
+
+
+
+    @Override
+    public String toString() {
+        return String.format("Категория: %s, Даты: %s — %s, Сумма: %s — %s, Комментарий: %s",
+                category == null ? "Все" : category,
+                startDate == null ? "..." : startDate,
+                endDate == null ? "..." : endDate,
+                minAmount == null ? "..." : minAmount,
+                maxAmount == null ? "..." : maxAmount,
+                commentToken == null ? "Все" : commentToken);
+    }
+
 
 }
