@@ -1,6 +1,8 @@
 package com.skillbox.controller.option;
 
-
+/**
+ * Перечисление для агрегации по категориям
+ */
 public enum AggregateOption implements MenuOption {
     SUM_COUNT("подсчёт суммы"),
     AVERAGE_VALUE_COUNT("подсчёт среднего значения"),

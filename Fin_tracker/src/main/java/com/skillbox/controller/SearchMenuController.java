@@ -78,26 +78,26 @@ public class SearchMenuController extends AbstractMenuController<SearchOption> {
 
     private TransactionFilterDto inputDates(TransactionFilterDto filter) {
         System.out.println("Введите начальную дату (в формате YYYY-MM-DD) (Enter - не ограничивать): ");
-       String startDateInput = scanner.nextLine();
-       if(!startDateInput.isEmpty()){
-           LocalDate startDate = LocalDate.parse(startDateInput);
-           filter.setStartDate(startDate);
-       }
+        String startDateInput = scanner.nextLine();
+        if (!startDateInput.isEmpty()) {
+            LocalDate startDate = LocalDate.parse(startDateInput);
+            filter.setStartDate(startDate);
+        }
         System.out.println("Введите конечную дату (в формате YYYY-MM-DD) (Enter - не ограничивать): ");
-   String endDateInput = scanner.nextLine();
-   if(!endDateInput.isEmpty()){
-       LocalDate endDate = LocalDate.parse(endDateInput);
-       filter.setEndDate(endDate);
-   }
-   return filter;
+        String endDateInput = scanner.nextLine();
+        if (!endDateInput.isEmpty()) {
+            LocalDate endDate = LocalDate.parse(endDateInput);
+            filter.setEndDate(endDate);
+        }
+        return filter;
     }
 
     private TransactionFilterDto inputCategory(TransactionFilterDto filter) {
         System.out.println("Введите категорию для поиска: (Enter - не задавать категорию)");
-       String category = scanner.nextLine().trim();
-       if(!category.isEmpty()){
-           filter.setCategory(category);
-       }
+        String category = scanner.nextLine().trim();
+        if (!category.isEmpty()) {
+            filter.setCategory(category);
+        }
         return filter;
     }
 }

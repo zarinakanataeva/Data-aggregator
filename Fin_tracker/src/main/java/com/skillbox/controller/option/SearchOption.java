@@ -1,5 +1,8 @@
 package com.skillbox.controller.option;
 
+/**
+ * Перечисление для поиска по категориям
+ */
 public enum SearchOption implements MenuOption {
     EXIT("сохранить поиск и вернуться назад"),
     ALL_TRANSACTION("выбрать все транзакции (сбросит все ранее заданные фильтры)"),

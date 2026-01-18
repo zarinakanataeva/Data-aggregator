@@ -2,6 +2,7 @@ package com.skillbox.controller;
 
 import com.skillbox.controller.option.MenuOption;
 import com.skillbox.controller.option.OptionUtils;
+
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Scanner;
@@ -29,11 +30,6 @@ public abstract class AbstractMenuController<E extends Enum<E> & MenuOption> {
         this.scanner = new Scanner(System.in).useDelimiter("\n");
     }
 
-    /**
-     * Выводит меню и ждет ввод пользователя.
-     *
-     * @return выбранную опцию пункта меню
-     */
     protected E selectMenu() {
         int option;
 
@@ -41,15 +37,14 @@ public abstract class AbstractMenuController<E extends Enum<E> & MenuOption> {
             System.out.println(description);
             System.out.println(menu);
             System.out.print("Введите нужную опцию и нажмите Enter: ");
-String input = scanner.nextLine().trim();
+            String input = scanner.nextLine().trim();
 
             try {
-                option = Integer.parseInt(input); // Превращаем в число
+                option = Integer.parseInt(input);
                 if (numOptions.contains(option)) {
                     break;
                 }
             } catch (NumberFormatException e) {
-                // Если ввели не число, цикл просто пойдет дальше
             }
 
             System.err.println("Выбрана неверная опция!\n" + "Попробуйте заново.\n");
@@ -57,13 +52,6 @@ String input = scanner.nextLine().trim();
         return OptionUtils.of(options, option);
     }
 
-
-    /**
-     * Возвращает строковое представление меню.
-     *
-     * @param enumClass класс перечисления.
-     * @return строковое представление
-     */
     private String toMenu(Class<E> enumClass) {
         return Arrays.stream(enumClass.getEnumConstants())
                 .sorted(Comparator.comparingInt(MenuOption::getOption))

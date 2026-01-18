@@ -9,11 +9,6 @@ import java.math.BigDecimal;
  */
 public interface Taxable {
 
-    /**
-     * Метод для расчета налога на транзакцию.
-     *
-     * @return сумма налога
-     */
     BigDecimal calculateTax();
 
 }

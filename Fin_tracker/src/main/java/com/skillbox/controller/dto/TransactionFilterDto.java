@@ -27,8 +27,8 @@ public class TransactionFilterDto {
     private Predicate<Transaction> datePredicate() {
         return transaction -> {
             LocalDateTime date = transaction.getDate();
-            LocalDateTime start = startDate == null ? null : startDate.atStartOfDay();
-            LocalDateTime end = endDate == null ? null : endDate.atStartOfDay();
+            LocalDateTime start = getStartDate();
+            LocalDateTime end = getEndDate();
             return (start == null || !date.isBefore(start)) &&
                     (end == null || !date.isAfter(end))
                     || (transaction instanceof Recurring && ((Recurring) transaction).isExecutedBetween(start, end));
@@ -45,7 +45,6 @@ public class TransactionFilterDto {
     }
 
     private Predicate<Transaction> amountPredicate() {
-        // TODO: реализуйте метод, возвращающий предикат для фильтрации транзакций по диапазону суммы
         return transaction -> {
             double amount = transaction.getAmount();
             boolean isMinValid = minAmount == null || amount >= minAmount;
@@ -56,9 +55,9 @@ public class TransactionFilterDto {
 
 
     private Predicate<Transaction> categoryPredicate() {
-      if(category == null){
-          return transaction -> true;
-      }
+        if (category == null) {
+            return transaction -> true;
+        }
         return transaction -> transaction.getCategory().equals(category);
     }
 
@@ -71,6 +70,14 @@ public class TransactionFilterDto {
                 .and(amountPredicate());
     }
 
+
+    public LocalDateTime getStartDate() {
+        return startDate == null ? null : startDate.atStartOfDay();
+    }
+
+    public LocalDateTime getEndDate() {
+        return endDate == null ? null : endDate.atTime(23, 59, 59);
+    }
 
 
     @Override

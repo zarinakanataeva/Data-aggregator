@@ -15,7 +15,7 @@ public class Account implements AccountInfo, BalanceOperations, AccountStatement
     int accountId;
     int accountType;
     int userId;
-    private List<Transaction> transactions; // Список транзакций
+    private List<Transaction> transactions;
     private BigDecimal balance;
 
     public Account(int accountId, int accountType, int userId) {
@@ -23,9 +23,8 @@ public class Account implements AccountInfo, BalanceOperations, AccountStatement
         this.accountType = accountType;
         this.userId = userId;
         this.transactions = new ArrayList<>();
-        this.balance = BigDecimal.ZERO; // Начальный баланс
+        this.balance = BigDecimal.ZERO;
     }
-
 
     @Override
     public AccountType getAccountType() {
@@ -34,6 +33,6 @@ public class Account implements AccountInfo, BalanceOperations, AccountStatement
 
     @Override
     public void addTransaction(Transaction transaction) {
-transactions.add(transaction);
+        transactions.add(transaction);
     }
 }

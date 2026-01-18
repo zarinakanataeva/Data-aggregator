@@ -1,24 +1,22 @@
 package com.skillbox.data.model;
 
-
 import lombok.Data;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
  * Абстрактный класс, представляющий собой транзакцию
  */
 @Data
-public abstract class Transaction  {
+public abstract class Transaction {
 
-    protected Transaction(int userId, int transactionId, LocalDateTime date, String category,double amount, String transactionType ){
+    protected Transaction(int userId, int transactionId, LocalDateTime date, String category, double amount, String transactionType) {
         this.userId = userId;
         this.transactionId = transactionId;
         this.date = date;
         this.category = category;
         this.amount = amount;
-        this. transactionType = transactionType;
+        this.transactionType = transactionType;
     }
 
     private LocalDateTime date;

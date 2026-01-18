@@ -1,5 +1,8 @@
 package com.skillbox.controller.option;
 
+/**
+ * Перечисление для группировки по категориям
+ */
 public enum GroupOption implements MenuOption {
 
     BACK("вернуться назад (без группировки)"),
@@ -23,7 +26,8 @@ public enum GroupOption implements MenuOption {
 
 
     @Override
-    public int getOption() { return ordinal();
+    public int getOption() {
+        return ordinal();
     }
 
     @Override
