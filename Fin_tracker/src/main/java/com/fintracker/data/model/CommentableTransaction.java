@@ -3,34 +3,35 @@ package com.fintracker.data.model;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.math.BigDecimal;
+import java.util.Collections;
 
 /**
  * Класс управляющий транзакциями с комментариями.
  */
 
-
 public class CommentableTransaction extends Transaction implements Commentable {
-
-    private List<String> comments;
+    private final List<String> comments;
 
     public CommentableTransaction(int userId, int transactionId, LocalDateTime date, String category,
-                                  double amount, String transactionType, List<String> comments) {
+                                  BigDecimal amount, String transactionType, List<String> comments) {
         super(userId, transactionId, date, category, amount, transactionType);
-        this.comments = (comments != null) ? new ArrayList<>(comments) : new ArrayList<>();
+        this.comments = comments == null ? new ArrayList<>() : new ArrayList<>(comments);
     }
 
     @Override
     public List<String> getComments() {
-        return comments;
+        return Collections.unmodifiableList(comments);
     }
 
     public void addComment(String comment) {
-        comments.add(comment);
+        if (comment == null || comment.isBlank())
+            throw new IllegalArgumentException("Комментарий не может быть пустым");
+        comments.add(comment.trim());
     }
 
     @Override
     public String getTransactionInfo() {
-        return String.format("Транзакция %d (Список: %s)",
-                getTransactionId(), comments.toString());
+        return String.format("Транзакция %d (Комментарии: %s)", getTransactionId(), comments);
     }
 }

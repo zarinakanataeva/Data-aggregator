@@ -99,7 +99,7 @@ public class GroupMenuController extends AbstractMenuController<GroupOption> {
     private void groupByAccountType() {
         Map<String, List<Transaction>> groupedByAccountType =
                 transactions.stream()
-                        .collect(Collectors.groupingBy(transaction -> getAccountTypeName(transaction.getTransactionType())));
+                        .collect(Collectors.groupingBy(transaction -> "Тип счёта не указан: в транзакции нет accountId"));
         System.out.println("Группировка по типу счета: " + groupedByAccountType);
     }
 
@@ -115,23 +115,14 @@ public class GroupMenuController extends AbstractMenuController<GroupOption> {
         return selectMenu();
     }
 
-    public String getAccountTypeName(String accountType) {
-        return switch (accountType) {
-            case "0" -> "Текущий";
-            case "1" -> "Сберегательный";
-            case "2" -> "Кредитный";
-            default -> "Неизвестный тип";
-        };
-    }
-
     private double getProcessedAmount(Transaction t) {
         if (t instanceof TaxableTransaction taxable) {
-            return taxable.calculateTax().doubleValue();
+            return taxable.calculateNetAmount().doubleValue();
         }
         if (t instanceof ForeignCurrencyTransaction foreign) {
-            return foreign.convertToBaseCurrency(BigDecimal.valueOf(t.getAmount())).doubleValue();
+            return foreign.convertToBaseCurrency(t.getAmount()).doubleValue();
         }
-        return t.getAmount();
+        return t.getAmount().doubleValue();
     }
 
 

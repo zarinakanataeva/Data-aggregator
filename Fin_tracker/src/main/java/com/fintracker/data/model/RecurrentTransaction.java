@@ -4,72 +4,57 @@ package com.fintracker.data.model;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * Класс управляющий повторяющимися транзакциями.
+ */
 
-public class RecurrentTransaction extends Transaction implements Recurring{
-    /**
-     * Класс управляющий повторяющимися транзакциями.
-     */
-    private RecurrencePattern pattern;
-    private int occurrences;
+public class RecurrentTransaction extends Transaction implements Recurring {
+    private final RecurrencePattern pattern;
+    private final int occurrences;
 
     public RecurrentTransaction(int userId, int transactionId, LocalDateTime date, String category,
-                                double amount, String transactionType, RecurrencePattern pattern, int occurrences) {
+                                BigDecimal amount, String transactionType,
+                                RecurrencePattern pattern, int occurrences) {
         super(userId, transactionId, date, category, amount, transactionType);
+        if (pattern == null) throw new IllegalArgumentException("Периодичность не задана");
+        if (occurrences < 1) throw new IllegalArgumentException("Количество повторений должно быть положительным");
         this.pattern = pattern;
         this.occurrences = occurrences;
     }
 
+    public RecurrencePattern getPattern() { return pattern; }
+    public int getOccurrences() { return occurrences; }
 
-    @Override
-    public LocalDateTime getNextOccurrence(LocalDateTime dateTime) {
-        return dateTime.plus(pattern.getDuration());
-    }
-
-    @Override
-    public LocalDateTime getPreviousOccurrence(LocalDateTime dateTime) {
-        return dateTime.minus(pattern.getDuration());
-    }
+    @Override public LocalDateTime getNextOccurrence(LocalDateTime dateTime) { return pattern.addTo(dateTime); }
+    @Override public LocalDateTime getPreviousOccurrence(LocalDateTime dateTime) { return pattern.subtractFrom(dateTime); }
 
     @Override
     public BigDecimal getTransactionAmount(LocalDateTime dateTime) {
-        return
-                BigDecimal.valueOf(getAmount()).multiply(BigDecimal.valueOf(occurrences));
+        return getAmount().multiply(BigDecimal.valueOf(countOccurrencesBetween(dateTime, dateTime)));
     }
 
     @Override
     public boolean isExecutedBetween(LocalDateTime startDate, LocalDateTime endDate) {
-       LocalDateTime current = getDate();
-       for(int i = 0; i < occurrences; i++){
-           if(current.isAfter(startDate) && current.isBefore(endDate)){
-               return true;
-           }
-           current = getNextOccurrence(current);
-       }
         return countOccurrencesBetween(startDate, endDate) > 0;
     }
 
     public long countOccurrencesBetween(LocalDateTime start, LocalDateTime end) {
+        if (start != null && end != null && start.isAfter(end)) return 0;
         long count = 0;
         LocalDateTime current = getDate();
-
         for (int i = 0; i < occurrences; i++) {
-            boolean notBeforeStart = (start == null || !current.isBefore(start));
-            boolean notAfterEnd = (end == null || !current.isAfter(end));
-
-            if (notBeforeStart && notAfterEnd) {
-                count++;
-            }
+            boolean afterStart = start == null || !current.isBefore(start);
+            boolean beforeEnd = end == null || !current.isAfter(end);
+            if (afterStart && beforeEnd) count++;
+            if (end != null && current.isAfter(end)) break;
             current = getNextOccurrence(current);
-            if (end != null && current.isAfter(end)) {
-                break;
-            }
         }
         return count;
     }
 
     @Override
     public String getTransactionInfo() {
-        return String.format("Recurrent Transaction: %s, Amount: %.2f, Pattern: %s, Occurrences: %d",
+        return String.format("Повторяющаяся транзакция: %s, сумма: %s, периодичность: %s, повторений: %d",
                 getDate(), getAmount(), pattern, occurrences);
     }
 }

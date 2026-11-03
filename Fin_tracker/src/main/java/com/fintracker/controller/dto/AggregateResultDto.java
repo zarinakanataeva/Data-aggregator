@@ -1,6 +1,7 @@
 package com.fintracker.controller.dto;
 
 import lombok.Data;
+import java.math.BigDecimal;
 
 /**
  * DTO для передачи результатов агрегирования транзакций.
@@ -8,8 +9,7 @@ import lombok.Data;
 
 @Data
 public class AggregateResultDto {
-    private double sum;
-    private double average;
+    private BigDecimal sum = BigDecimal.ZERO;
+    private BigDecimal average = BigDecimal.ZERO;
     private long count;
-    
 }

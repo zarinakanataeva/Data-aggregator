@@ -7,6 +7,7 @@ import com.fintracker.controller.option.GroupOption;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -15,11 +16,11 @@ import java.util.Map;
 
 @Data
 public class Analytic {
-    private LocalDateTime calculationDate;
-    private String groupOption;
-    private String aggregateOption;
-    private String filterDescription;
-    private Map<String, Double> data;
+    private final LocalDateTime calculationDate;
+    private final String groupOption;
+    private final String aggregateOption;
+    private final String filterDescription;
+    private final Map<String, AggregateResultDto> data;
 
     public Analytic(GroupOption group, AggregateOption aggregate,
                     TransactionFilterDto filter, Map<String, AggregateResultDto> results) {
@@ -27,33 +28,26 @@ public class Analytic {
         this.groupOption = group.getName();
         this.aggregateOption = aggregate.getName();
         this.filterDescription = filter.toString();
-        this.data = new java.util.LinkedHashMap<>();
-
-        results.forEach((key, value) -> {
-            if (aggregate == AggregateOption.SUM_COUNT) data.put(key, value.getSum());
-            else if (aggregate == AggregateOption.AMOUNT_COUNT) data.put(key, (double) value.getCount());
-            else data.put(key, value.getAverage());
-        });
+        this.data = new LinkedHashMap<>(results);
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("===================================\n");
-        sb.append("Дата: ")
-                .append(calculationDate.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-                .append("\n");
-        sb.append("Имя: '").append(groupOption).append(" (").append(aggregateOption).append(")'\n");
-        sb.append("Фильтр: ").append(filterDescription).append("\n");
-        sb.append("-----------------------------------\n");
-        sb.append("Аналитика:\n");
+        StringBuilder output = new StringBuilder("===================================\n")
+                .append("Дата: ").append(calculationDate).append('\n')
+                .append("Группировка: ").append(groupOption).append(" ( ").append(aggregateOption).append(" )\n")
+                .append("Фильтр: ").append(filterDescription).append('\n')
+                .append("-----------------------------------\nАналитика:\n");
         data.forEach((key, value) -> {
-            if (aggregateOption.contains("количеств")) {
-                sb.append(String.format("%s: %.0f\n", key, value));
-            } else {
-                sb.append(String.format("%s: %.2f\n", key, value));
+            output.append(key).append(": ");
+            switch (aggregateOption) {
+                case "подсчёт суммы" -> output.append(value.getSum());
+                case "подсчёт среднего значения" -> output.append(value.getAverage());
+                case "подсчёт количества" -> output.append(value.getCount());
+                default -> output.append(value);
             }
+            output.append('\n');
         });
-        return sb.toString();
+        return output.toString();
     }
 }

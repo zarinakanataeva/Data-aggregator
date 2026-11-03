@@ -38,19 +38,20 @@ public class AggregateMenuController extends AbstractMenuController<AggregateOpt
     }
 
     private AggregateResultDto calculateSum() {
-        double sum = transactions.stream()
-                .mapToDouble(this::getProcessedAmount)
-                .sum();
+        BigDecimal sum = transactions.stream()
+                .map(this::getProcessedAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
         AggregateResultDto dto = new AggregateResultDto();
         dto.setSum(sum);
         return dto;
     }
 
     private AggregateResultDto calculateAverage() {
-        double average = transactions.stream()
-                .mapToDouble(this::getProcessedAmount)
-                .average()
-                .orElse(0.0);
+        BigDecimal total = transactions.stream()
+                .map(this::getProcessedAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal average = transactions.isEmpty() ? BigDecimal.ZERO
+                : total.divide(BigDecimal.valueOf(transactions.size()), 2, java.math.RoundingMode.HALF_UP);
         AggregateResultDto dto = new AggregateResultDto();
         dto.setAverage(average);
         return dto;
@@ -67,17 +68,14 @@ public class AggregateMenuController extends AbstractMenuController<AggregateOpt
         return selectMenu();
     }
 
-    private double getProcessedAmount(Transaction t) {
+    private BigDecimal getProcessedAmount(Transaction t) {
         if (t instanceof TaxableTransaction taxable) {
-            return taxable.calculateTax().doubleValue();
+            return taxable.calculateNetAmount();
         }
         if (t instanceof ForeignCurrencyTransaction foreign) {
-            return foreign.convertToBaseCurrency(BigDecimal.valueOf(t.getAmount())).doubleValue();
+            return foreign.convertToBaseCurrency(t.getAmount());
         }
         return t.getAmount();
     }
 
 }
-
-
-

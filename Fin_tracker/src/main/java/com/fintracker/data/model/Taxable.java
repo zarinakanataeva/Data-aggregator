@@ -9,6 +9,6 @@ import java.math.BigDecimal;
  */
 public interface Taxable {
 
-    BigDecimal calculateTax();
+    BigDecimal calculateNetAmount();
 
 }

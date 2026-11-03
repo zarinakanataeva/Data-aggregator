@@ -5,8 +5,10 @@ import com.fintracker.data.model.Recurring;
 import com.fintracker.data.model.Transaction;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.function.Predicate;
 
 /**
@@ -15,69 +17,70 @@ import java.util.function.Predicate;
 
 @Data
 public class TransactionFilterDto {
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private String commentToken;
+    private Double minAmount;
+    private Double maxAmount;
+    private String category;
 
-    LocalDate startDate;
-    LocalDate endDate;
-    String commentToken;
-    Double minAmount;
-    Double maxAmount;
-    String category;
-
-    private Predicate<Transaction> datePredicate() {
-        return transaction -> {
-            LocalDateTime date = transaction.getDate();
-            LocalDateTime start = getStartDate();
-            LocalDateTime end = getEndDate();
-            return (start == null || !date.isBefore(start)) &&
-                    (end == null || !date.isAfter(end))
-                    || (transaction instanceof Recurring && ((Recurring) transaction).isExecutedBetween(start, end));
-        };
+    public Predicate<Transaction> buildPredicate() {
+        validate();
+        return datePredicate().and(amountPredicate()).and(commentPredicate()).and(categoryPredicate());
     }
 
-    private Predicate<Transaction> commentPredicate() {
-        if (commentToken == null || commentToken.isBlank()) {
-            return transaction -> true;
+    private void validate() {
+        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+            throw new IllegalArgumentException("Начальная дата не может быть позже конечной");
         }
-        return transaction -> transaction instanceof Commentable &&
-                ((Commentable) transaction).getComments().stream()
-                        .anyMatch(c -> c.toLowerCase().contains(commentToken.toLowerCase()));
+        if ((minAmount != null && !Double.isFinite(minAmount))
+                || (maxAmount != null && !Double.isFinite(maxAmount))) {
+            throw new IllegalArgumentException("Границы суммы должны быть конечными числами");
+        }
+        if (minAmount != null && maxAmount != null && minAmount > maxAmount) {
+            throw new IllegalArgumentException("Минимальная сумма не может быть больше максимальной");
+        }
+    }
+
+    private Predicate<Transaction> datePredicate() {
+        LocalDateTime start = getStartDate();
+        LocalDateTime endExclusive = endDate == null ? null : endDate.plusDays(1).atStartOfDay();
+        return transaction -> {
+            LocalDateTime date = transaction.getDate();
+            boolean inRange = (start == null || !date.isBefore(start))
+                    && (endExclusive == null || date.isBefore(endExclusive));
+            return inRange || (transaction instanceof Recurring recurring
+                    && recurring.isExecutedBetween(start, endExclusive == null ? null : endExclusive.minusNanos(1)));
+        };
     }
 
     private Predicate<Transaction> amountPredicate() {
-        return transaction -> {
-            double amount = transaction.getAmount();
-            boolean isMinValid = minAmount == null || amount >= minAmount;
-            boolean isMaxValid = maxAmount == null || amount <= maxAmount;
-            return isMaxValid && isMinValid;
-        };
+        BigDecimal min = minAmount == null ? null : BigDecimal.valueOf(minAmount);
+        BigDecimal max = maxAmount == null ? null : BigDecimal.valueOf(maxAmount);
+        return transaction -> (min == null || transaction.getAmount().compareTo(min) >= 0)
+                && (max == null || transaction.getAmount().compareTo(max) <= 0);
     }
 
+    private Predicate<Transaction> commentPredicate() {
+        if (commentToken == null || commentToken.isBlank()) return transaction -> true;
+        String token = commentToken.toLowerCase(Locale.ROOT);
+        return transaction -> transaction instanceof Commentable commentable
+                && commentable.getComments().stream().filter(c -> c != null)
+                .anyMatch(comment -> comment.toLowerCase(Locale.ROOT).contains(token));
+    }
 
     private Predicate<Transaction> categoryPredicate() {
-        if (category == null) {
-            return transaction -> true;
-        }
-        return transaction -> transaction.getCategory().equals(category);
+        if (category == null || category.isBlank()) return transaction -> true;
+        return transaction -> transaction.getCategory().equalsIgnoreCase(category.trim());
     }
-
-
-    public Predicate<Transaction> buildPredicate() {
-        return categoryPredicate()
-                .and(amountPredicate())
-                .and(commentPredicate())
-                .and(datePredicate())
-                .and(amountPredicate());
-    }
-
 
     public LocalDateTime getStartDate() {
         return startDate == null ? null : startDate.atStartOfDay();
     }
 
     public LocalDateTime getEndDate() {
-        return endDate == null ? null : endDate.atTime(23, 59, 59);
+        return endDate == null ? null : endDate.atTime(23, 59, 59, 999_999_999);
     }
-
 
     @Override
     public String toString() {
@@ -89,6 +92,4 @@ public class TransactionFilterDto {
                 maxAmount == null ? "..." : maxAmount,
                 commentToken == null ? "Все" : commentToken);
     }
-
-
 }
